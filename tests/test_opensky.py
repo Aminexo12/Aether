@@ -1,9 +1,8 @@
-from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.data.models import BBOX_FRANCE, Flight
+from app.data.models import BBOX_FRANCE
 from app.data.opensky import OpenSkyClient, _parse_state
 from app.utils.cache import TTLCache
 
@@ -69,7 +68,6 @@ def test_ttl_cache_expired():
 @pytest.mark.asyncio
 async def test_get_flights_uses_cache():
     client = OpenSkyClient()
-    flights = [MagicMock(spec=Flight)]
 
     with patch.object(client, "_token_manager") as mock_tm, \
          patch.object(client, "_http") as mock_http:
