@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 
 import httpx
+from fastapi import HTTPException
 
 from app.config import settings
 from app.data.models import BoundingBox, Flight
@@ -22,15 +23,21 @@ class TokenManager:
         if self._token and time.monotonic() < self._expires_at - 30:
             return self._token
 
-        response = await client.post(
-            _TOKEN_URL,
-            data={
-                "grant_type": "client_credentials",
-                "client_id": settings.opensky_client_id,
-                "client_secret": settings.opensky_client_secret,
-            },
-        )
-        response.raise_for_status()
+        try:
+            response = await client.post(
+                _TOKEN_URL,
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": settings.opensky_client_id,
+                    "client_secret": settings.opensky_client_secret,
+                },
+            )
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(
+                status_code=502,
+                detail=f"OpenSky auth failed ({e.response.status_code}) — check OPENSKY credentials in .env",
+            )
         payload = response.json()
 
         self._token = payload["access_token"]
@@ -43,23 +50,28 @@ class OpenSkyClient:
         self._token_manager = TokenManager()
         self._http = httpx.AsyncClient(timeout=10.0)
 
+    @property
+    def _authenticated(self) -> bool:
+        return bool(settings.opensky_client_id and settings.opensky_client_secret)
+
     async def get_flights(self, bbox: BoundingBox) -> list[Flight]:
         cache_key = f"flights:{bbox.lamin},{bbox.lomin},{bbox.lamax},{bbox.lomax}"
         cached = _cache.get(cache_key)
         if cached is not None:
             return cached
 
-        token = await self._token_manager.get_token(self._http)
-        response = await self._http.get(
-            _STATES_URL,
-            params={
-                "lamin": bbox.lamin,
-                "lomin": bbox.lomin,
-                "lamax": bbox.lamax,
-                "lomax": bbox.lomax,
-            },
-            headers={"Authorization": f"Bearer {token}"},
-        )
+        params = {
+            "lamin": bbox.lamin,
+            "lomin": bbox.lomin,
+            "lamax": bbox.lamax,
+            "lomax": bbox.lomax,
+        }
+        headers = {}
+        if self._authenticated:
+            token = await self._token_manager.get_token(self._http)
+            headers["Authorization"] = f"Bearer {token}"
+
+        response = await self._http.get(_STATES_URL, params=params, headers=headers)
         response.raise_for_status()
 
         data = response.json()
