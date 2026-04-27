@@ -27,3 +27,29 @@ class BoundingBox(BaseModel):
 BBOX_FRANCE = BoundingBox(lamin=41.3, lomin=-5.1, lamax=51.1, lomax=9.5)
 BBOX_EUROPE = BoundingBox(lamin=35.0, lomin=-10.0, lamax=70.0, lomax=40.0)
 BBOX_WORLD = BoundingBox(lamin=-90, lomin=-180, lamax=90, lomax=180)
+
+
+class Airport(BaseModel):
+    iata_code: str
+    name: str
+    city: str | None
+    country: str | None
+    latitude: float | None
+    longitude: float | None
+
+
+class Airline(BaseModel):
+    iata_code: str
+    name: str
+    country: str | None
+    callsign: str | None
+
+
+class FlightSchedule(BaseModel):
+    flight_iata: str
+    airline_iata: str | None
+    departure_iata: str | None
+    arrival_iata: str | None
+    scheduled_departure: datetime | None
+    scheduled_arrival: datetime | None
+    status: str | None

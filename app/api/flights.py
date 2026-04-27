@@ -1,11 +1,20 @@
 from fastapi import APIRouter, HTTPException, Query
 
-from app.data.models import BBOX_EUROPE, BBOX_FRANCE, BBOX_WORLD, BoundingBox, Flight
+from app.data.models import (
+    BBOX_EUROPE,
+    BBOX_FRANCE,
+    BBOX_WORLD,
+    Airline,
+    Airport,
+    BoundingBox,
+    Flight,
+)
 from app.data.opensky import OpenSkyClient
+from app.data.static_data import get_airline, get_airport
 
 router = APIRouter(prefix="/flights", tags=["flights"])
 
-_client = OpenSkyClient()
+_opensky = OpenSkyClient()
 
 _COUNTRY_BBOX = {
     "FR": BBOX_FRANCE,
@@ -45,4 +54,20 @@ async def get_live_flights(
     else:
         box = BBOX_WORLD
 
-    return await _client.get_flights(box)
+    return await _opensky.get_flights(box)
+
+
+@router.get("/airports/{iata_code}", response_model=Airport)
+async def get_airport_route(iata_code: str):
+    airport = get_airport(iata_code)
+    if airport is None:
+        raise HTTPException(status_code=404, detail=f"Airport '{iata_code.upper()}' not found")
+    return airport
+
+
+@router.get("/airlines/{iata_code}", response_model=Airline)
+async def get_airline_route(iata_code: str):
+    airline = get_airline(iata_code)
+    if airline is None:
+        raise HTTPException(status_code=404, detail=f"Airline '{iata_code.upper()}' not found")
+    return airline
