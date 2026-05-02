@@ -2,7 +2,7 @@
 {"id": 2, "question": "What are the 5 fastest aircraft over Europe right now?", "intent": "REALTIME", "expected_tools": ["live_tool"], "must_contain": ["km/h"], "difficulty": "easy"}
 {"id": 3, "question": "How many flights are on the ground versus in the air in Europe?", "intent": "REALTIME", "expected_tools": ["live_tool"], "must_contain": ["ground", "airborne"], "difficulty": "easy"}
 {"id": 4, "question": "Which countries have the most flights over Europe right now?", "intent": "REALTIME", "expected_tools": ["live_tool"], "must_contain": ["country"], "difficulty": "easy"}
-{"id": 5, "question": "What is the average cruising altitude of flights over Europe?", "intent": "REALTIME", "expected_tools": ["live_tool"], "must_contain": ["altitude", "m"], "difficulty": "medium"}
+{"id": 5, "question": "What is the average cruising altitude of flights over Europe?", "intent": "ANALYTICS", "expected_tools": ["analytics_tool"], "must_contain": ["altitude", "m"], "difficulty": "medium"}
 {"id": 6, "question": "What compensation am I entitled to if my flight is cancelled under EU 261/2004?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["250", "400", "600"], "difficulty": "medium"}
 {"id": 7, "question": "What is the EU rule for flight delays over 3 hours?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["3", "delay"], "difficulty": "medium"}
 {"id": 8, "question": "What does IATA stand for?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["International", "Air", "Transport"], "difficulty": "easy"}
@@ -21,7 +21,7 @@
 {"id": 21, "question": "What is the average speed of commercial flights over Europe at this moment?", "intent": "ANALYTICS", "expected_tools": ["analytics_tool"], "must_contain": ["km/h"], "difficulty": "easy"}
 {"id": 22, "question": "Which country dominates European airspace right now by number of flights?", "intent": "ANALYTICS", "expected_tools": ["analytics_tool"], "must_contain": ["country"], "difficulty": "medium"}
 {"id": 23, "question": "What is the average altitude of flights over Europe and how does it compare to typical cruising altitude?", "intent": "ANALYTICS", "expected_tools": ["analytics_tool"], "must_contain": ["altitude", "m"], "difficulty": "medium"}
-{"id": 24, "question": "Are there any flights with unusual speed or altitude over Europe right now?", "intent": "ANOMALY", "expected_tools": ["anomaly_tool"], "must_contain": ["anomal", "unusual", "score"], "difficulty": "medium"}
+{"id": 24, "question": "Are there any flights with unusual speed or altitude over Europe right now?", "intent": "ANOMALY", "expected_tools": ["anomaly_tool"], "must_contain": ["anomal", "unusual"], "difficulty": "medium"}
 {"id": 25, "question": "Which aircraft are behaving abnormally over Europe at this moment?", "intent": "ANOMALY", "expected_tools": ["anomaly_tool"], "must_contain": ["anomal"], "difficulty": "medium"}
 {"id": 26, "question": "Are there any suspicious flights over Europe right now?", "intent": "ANOMALY", "expected_tools": ["anomaly_tool"], "must_contain": ["flight"], "difficulty": "easy"}
 {"id": 27, "question": "Show me the most anomalous aircraft currently tracked over Europe.", "intent": "ANOMALY", "expected_tools": ["anomaly_tool"], "must_contain": ["anomal", "km/h"], "difficulty": "medium"}

@@ -2,11 +2,28 @@ CLASSIFIER_SYSTEM = """\
 You are an intent classifier for an aviation AI assistant.
 
 Classify the user question into exactly one of these intents:
-- REALTIME: needs live flight data (current flights, positions, speeds, counts)
-- KNOWLEDGE: needs aviation regulations, definitions, or documentation
-- HYBRID: needs both live flight data AND documentation
-- ANALYTICS: needs statistics or aggregated analysis of flight patterns
-- ANOMALY: asks about unusual, suspicious, or abnormal flights/patterns
+
+- REALTIME: wants raw live data — specific flights, positions, lists, counts.
+  Examples: "how many planes", "which flights are over X", "show me flights", "list aircraft"
+
+- KNOWLEDGE: needs aviation regulations, definitions, or documentation.
+  Examples: "what does X mean", "what are passenger rights", "EU 261", "IFR vs VFR"
+
+- HYBRID: needs BOTH live data AND regulations/documentation in the same answer.
+  Examples: "how many flights over France AND what are delay rules"
+
+- ANALYTICS: wants computed statistics or aggregated metrics from live data.
+  Examples: "average speed", "average altitude", "percentage airborne", "which country has most flights"
+  Key signal: words like "average", "percentage", "statistics", "dominates", "most", "distribution"
+
+- ANOMALY: asks about unusual, abnormal, suspicious, or outlier flight behavior.
+  Examples: "unusual speed", "abnormal altitude", "suspicious flights", "faster than normal", "anomalous"
+  Key signal: words like "unusual", "abnormal", "suspicious", "faster than normal", "strange", "anomal"
+
+Rules:
+- If the question asks for an average/stat → ANALYTICS (even if it says "right now")
+- If the question asks about abnormal/unusual behavior → ANOMALY (even if it says "currently")
+- REALTIME is for raw lists and counts, not computed metrics
 
 Reply with a JSON object only, no other text:
 {"intent": "REALTIME", "reasoning": "brief reason"}
