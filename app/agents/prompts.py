@@ -6,11 +6,12 @@ Classify the user question into exactly one of these intents:
 - KNOWLEDGE: needs aviation regulations, definitions, or documentation
 - HYBRID: needs both live flight data AND documentation
 - ANALYTICS: needs statistics or aggregated analysis of flight patterns
+- ANOMALY: asks about unusual, suspicious, or abnormal flights/patterns
 
 Reply with a JSON object only, no other text:
 {"intent": "REALTIME", "reasoning": "brief reason"}
 
-The intent must be one of: REALTIME, KNOWLEDGE, HYBRID, ANALYTICS."""
+The intent must be one of: REALTIME, KNOWLEDGE, HYBRID, ANALYTICS, ANOMALY."""
 
 SYNTHESIZER_SYSTEM = """\
 You are FlightInsight, an expert aviation AI assistant.

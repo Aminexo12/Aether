@@ -11,6 +11,7 @@ from app.agents.prompts import CLASSIFIER_SYSTEM, SYNTHESIZER_SYSTEM
 from app.config import settings
 from app.data.models import BBOX_EUROPE
 from app.data.opensky import OpenSkyClient
+from app.ml.anomaly import detect
 from app.rag.retrieve import search_docs
 
 
@@ -38,7 +39,7 @@ async def classify_node(state: AgentState) -> dict:
     except (json.JSONDecodeError, AttributeError, KeyError):
         intent = "KNOWLEDGE"
 
-    if intent not in {"REALTIME", "KNOWLEDGE", "HYBRID", "ANALYTICS"}:
+    if intent not in {"REALTIME", "KNOWLEDGE", "HYBRID", "ANALYTICS", "ANOMALY"}:
         intent = "KNOWLEDGE"
 
     return {"intent": intent}
@@ -111,6 +112,28 @@ async def analytics_tool_node(state: AgentState) -> dict:
         f"- Average altitude: {avg_alt:.0f} m",
         f"- Top countries: {', '.join(f'{c} ({n})' for c, n in top5)}",
     ]
+
+    return {"tool_results": ["\n".join(lines)]}
+
+
+async def anomaly_tool_node(state: AgentState) -> dict:
+    client = OpenSkyClient()
+    try:
+        flights = await client.get_flights(BBOX_EUROPE)
+    finally:
+        await client.close()
+
+    anomalies = detect(flights, top_k=10)
+    if not anomalies:
+        return {"tool_results": ["Anomaly model not trained yet or no data available."]}
+
+    lines = [f"**Top {len(anomalies)} most anomalous flights over Europe (live):**"]
+    for a in anomalies:
+        lines.append(
+            f"- {a['callsign']} ({a['country']}) — "
+            f"{a['velocity_kmh']} km/h, alt {a['altitude_m']}m, "
+            f"vertical rate {a['vertical_rate']} m/s — score {a['anomaly_score']}"
+        )
 
     return {"tool_results": ["\n".join(lines)]}
 

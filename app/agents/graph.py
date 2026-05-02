@@ -3,6 +3,7 @@ from langgraph.graph import END, START, StateGraph
 from app.agents.nodes import (
     AgentState,
     analytics_tool_node,
+    anomaly_tool_node,
     classify_node,
     live_tool_node,
     rag_tool_node,
@@ -17,6 +18,7 @@ def _route_after_classify(state: AgentState) -> str:
         "KNOWLEDGE": "rag_tool",
         "HYBRID": "live_tool",
         "ANALYTICS": "analytics_tool",
+        "ANOMALY": "anomaly_tool",
     }.get(intent, "rag_tool")
 
 
@@ -34,13 +36,19 @@ def build_graph() -> StateGraph:
     graph.add_node("live_tool", live_tool_node)
     graph.add_node("rag_tool", rag_tool_node)
     graph.add_node("analytics_tool", analytics_tool_node)
+    graph.add_node("anomaly_tool", anomaly_tool_node)
     graph.add_node("synthesize", synthesize_node)
 
     graph.add_edge(START, "classify")
     graph.add_conditional_edges(
         "classify",
         _route_after_classify,
-        {"live_tool": "live_tool", "rag_tool": "rag_tool", "analytics_tool": "analytics_tool"},
+        {
+            "live_tool": "live_tool",
+            "rag_tool": "rag_tool",
+            "analytics_tool": "analytics_tool",
+            "anomaly_tool": "anomaly_tool",
+        },
     )
     graph.add_conditional_edges(
         "live_tool",
@@ -49,6 +57,7 @@ def build_graph() -> StateGraph:
     )
     graph.add_edge("rag_tool", "synthesize")
     graph.add_edge("analytics_tool", "synthesize")
+    graph.add_edge("anomaly_tool", "synthesize")
     graph.add_edge("synthesize", END)
 
     return graph.compile()
