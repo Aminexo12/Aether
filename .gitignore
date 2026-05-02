@@ -19,6 +19,7 @@ venv/
 # Data & models
 app/rag/documents/
 app/ml/artifacts/
+app/ml/data/
 *.joblib
 *.pkl
 
