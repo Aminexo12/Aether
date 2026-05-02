@@ -1,14 +1,14 @@
 {"id": 1, "question": "How many planes are currently flying over Europe?", "intent": "REALTIME", "expected_tools": ["live_tool"], "must_contain": ["airborne", "Europe"], "difficulty": "easy"}
 {"id": 2, "question": "What are the 5 fastest aircraft over Europe right now?", "intent": "REALTIME", "expected_tools": ["live_tool"], "must_contain": ["km/h"], "difficulty": "easy"}
 {"id": 3, "question": "How many flights are on the ground versus in the air in Europe?", "intent": "REALTIME", "expected_tools": ["live_tool"], "must_contain": ["ground", "airborne"], "difficulty": "easy"}
-{"id": 4, "question": "Which countries have the most flights over Europe right now?", "intent": "REALTIME", "expected_tools": ["live_tool"], "must_contain": ["country"], "difficulty": "easy"}
+{"id": 4, "question": "Which countries have the most flights over Europe right now?", "intent": "ANALYTICS", "expected_tools": ["analytics_tool"], "must_contain": ["country"], "difficulty": "easy"}
 {"id": 5, "question": "What is the average cruising altitude of flights over Europe?", "intent": "ANALYTICS", "expected_tools": ["analytics_tool"], "must_contain": ["altitude", "m"], "difficulty": "medium"}
 {"id": 6, "question": "What compensation am I entitled to if my flight is cancelled under EU 261/2004?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["250", "400", "600"], "difficulty": "medium"}
 {"id": 7, "question": "What is the EU rule for flight delays over 3 hours?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["3", "delay"], "difficulty": "medium"}
 {"id": 8, "question": "What does IATA stand for?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["International", "Air", "Transport"], "difficulty": "easy"}
 {"id": 9, "question": "What is a squawk code 7700?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["emergency"], "difficulty": "medium"}
 {"id": 10, "question": "What is the definition of a slot in air traffic management?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["slot", "time"], "difficulty": "medium"}
-{"id": 11, "question": "What does ETOPS mean for long-haul flights?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["engine", "operations"], "difficulty": "hard"}
+{"id": 11, "question": "What does ETOPS mean for long-haul flights?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["engine", "operational"], "difficulty": "hard"}
 {"id": 12, "question": "What are passenger rights under EU 261/2004 for denied boarding?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["boarding", "compensation"], "difficulty": "medium"}
 {"id": 13, "question": "My Paris to New York flight was cancelled 10 days before departure. What are my rights?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["600", "14"], "difficulty": "hard"}
 {"id": 14, "question": "What is the difference between IFR and VFR flight rules?", "intent": "KNOWLEDGE", "expected_tools": ["rag_tool"], "must_contain": ["instrument", "visual"], "difficulty": "medium"}

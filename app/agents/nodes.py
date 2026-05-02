@@ -127,12 +127,12 @@ async def anomaly_tool_node(state: AgentState) -> dict:
     if not anomalies:
         return {"tool_results": ["Anomaly model not trained yet or no data available."]}
 
-    lines = [f"**Top {len(anomalies)} most anomalous flights over Europe (live):**"]
+    lines = [f"**Top {len(anomalies)} unusual flights detected over Europe (live anomaly detection):**"]
     for a in anomalies:
         lines.append(
-            f"- {a['callsign']} ({a['country']}) — "
+            f"- {a['callsign']} ({a['country']}) — unusual pattern: "
             f"{a['velocity_kmh']} km/h, alt {a['altitude_m']}m, "
-            f"vertical rate {a['vertical_rate']} m/s — score {a['anomaly_score']}"
+            f"vertical rate {a['vertical_rate']} m/s (anomaly score: {a['anomaly_score']})"
         )
 
     return {"tool_results": ["\n".join(lines)]}
