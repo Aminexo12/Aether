@@ -21,18 +21,19 @@ class AgentState(TypedDict):
 
 
 async def classify_node(state: AgentState) -> dict:
-    llm = ChatAnthropic(
-        model="claude-haiku-4-5-20251001",
-        api_key=settings.anthropic_api_key,
-        max_tokens=128,
-    )
+    llm = ChatAnthropic(model="claude-haiku-4-5-20251001", api_key=settings.anthropic_api_key, max_tokens=128)
     user_msg = state["messages"][-1].content
     response = await llm.ainvoke([
         SystemMessage(content=CLASSIFIER_SYSTEM),
         HumanMessage(content=str(user_msg)),
     ])
     try:
-        data = json.loads(str(response.content))
+        raw = str(response.content).strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        data = json.loads(raw.strip())
         intent = data.get("intent", "KNOWLEDGE").upper()
     except (json.JSONDecodeError, AttributeError, KeyError):
         intent = "KNOWLEDGE"
@@ -115,11 +116,7 @@ async def analytics_tool_node(state: AgentState) -> dict:
 
 
 async def synthesize_node(state: AgentState) -> dict:
-    llm = ChatAnthropic(
-        model="claude-sonnet-4-6",
-        api_key=settings.anthropic_api_key,
-        max_tokens=1024,
-    )
+    llm = ChatAnthropic(model="claude-sonnet-4-6", api_key=settings.anthropic_api_key, max_tokens=1024)
     user_msg = str(state["messages"][-1].content)
     context = "\n\n---\n\n".join(state.get("tool_results") or ["No tool data available."])
 
