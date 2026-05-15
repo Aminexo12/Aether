@@ -34,24 +34,50 @@ _REGION_VIEW = {
 }
 
 
-def _fetch_flights(region: str) -> list[dict]:
+def _check_api() -> bool:
+    try:
+        return requests.get(f"{API_URL}/health", timeout=3).status_code == 200
+    except Exception:
+        return False
+
+
+def _fetch_flights(region: str) -> tuple[list[dict], str]:
     code = _REGION_CODE.get(region, "EU")
     try:
         r = requests.get(f"{API_URL}/flights/live", params={"country": code}, timeout=20)
         r.raise_for_status()
-        return r.json()
-    except Exception:
-        return []
+        return r.json(), ""
+    except requests.exceptions.ConnectionError:
+        return [], "API offline — run: uv run uvicorn app.main:app --reload"
+    except requests.exceptions.Timeout:
+        return [], "Request timed out (20 s) — API may be overloaded"
+    except requests.exceptions.HTTPError as exc:
+        return [], f"HTTP {exc.response.status_code} from /flights/live"
+    except Exception as exc:
+        return [], f"{type(exc).__name__}: {exc}"
 
 
-def _fetch_analytics(region: str) -> dict | None:
+def _fetch_analytics(region: str) -> tuple[dict | None, str]:
     code = _REGION_CODE.get(region, "EU")
     try:
         r = requests.get(f"{API_URL}/analytics/overview", params={"country": code}, timeout=20)
         r.raise_for_status()
-        return r.json()
-    except Exception:
-        return None
+        return r.json(), ""
+    except requests.exceptions.ConnectionError:
+        return None, "API offline — run: uv run uvicorn app.main:app --reload"
+    except requests.exceptions.Timeout:
+        return None, "Request timed out (20 s) — API may be overloaded"
+    except requests.exceptions.HTTPError as exc:
+        return None, f"HTTP {exc.response.status_code} from /analytics/overview"
+    except Exception as exc:
+        return None, f"{type(exc).__name__}: {exc}"
+
+
+def _error_banner(msg: str) -> None:
+    st.markdown(
+        f'<div class="error-banner">⚠ {html.escape(msg)}</div>',
+        unsafe_allow_html=True,
+    )
 
 
 # ── CSS ────────────────────────────────────────────────────────────────────────
@@ -504,6 +530,40 @@ hr { border-color: #1E2D47 !important; margin: 12px 0 !important; }
     margin-bottom: 16px;
 }
 
+/* ── Error banner ── */
+.error-banner {
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 4px;
+    padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: #F59E0B;
+    letter-spacing: 0.02em;
+    margin-bottom: 16px;
+}
+
+/* ── API status (sidebar) ── */
+.api-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+.api-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.api-dot--ok   { background: #4ADE80; }
+.api-dot--fail { background: #F59E0B; }
+.api-label--ok   { color: #4ADE80; }
+.api-label--fail { color: #F59E0B; }
+
 /* ── Stub page ── */
 .stub-page {
     display: flex;
@@ -819,8 +879,20 @@ def render_sidebar() -> None:
             except Exception as e:
                 st.error(f"API FAIL — {type(e).__name__}: {e}")
 
+        api_ok = _check_api()
+        dot_cls = "api-dot--ok" if api_ok else "api-dot--fail"
+        lbl_cls = "api-label--ok" if api_ok else "api-label--fail"
+        lbl_txt = "API online" if api_ok else "API offline"
         st.markdown(
-            '<div class="sidebar-footer">Data: OpenSky Network<br>Non-commercial use<br><br>Aether v0.2</div>',
+            f'<div class="api-status">'
+            f'<span class="api-dot {dot_cls}"></span>'
+            f'<span class="{lbl_cls}">{lbl_txt}</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            '<div class="sidebar-footer">Data: OpenSky Network<br>Non-commercial use<br><br>Aether v0.3</div>',
             unsafe_allow_html=True,
         )
 
@@ -895,12 +967,17 @@ def render_map_tab() -> None:
     cache_key = f"map_{region}"
     if do_refresh or cache_key not in st.session_state:
         with st.spinner("Fetching live flights..."):
-            flights = _fetch_flights(region)
+            flights, fetch_err = _fetch_flights(region)
         st.session_state[cache_key] = flights
+        st.session_state[f"{cache_key}_err"] = fetch_err
         st.session_state[f"{cache_key}_ts"] = datetime.utcnow().strftime("%H:%M:%S UTC")
 
     flights = st.session_state.get(cache_key, [])
+    fetch_err = st.session_state.get(f"{cache_key}_err", "")
     ts = st.session_state.get(f"{cache_key}_ts", "—")
+
+    if fetch_err:
+        _error_banner(fetch_err)
 
     valid = [f for f in flights if f.get("latitude") and f.get("longitude")]
     total = len(flights)
@@ -927,10 +1004,8 @@ def render_map_tab() -> None:
         )
 
     if not valid:
-        st.markdown(
-            '<div class="stub-page">No flight data — check API connection</div>',
-            unsafe_allow_html=True,
-        )
+        if not fetch_err:
+            _error_banner("No positioned flights returned — OpenSky may have no data for this region right now.")
         return
 
     df = pd.DataFrame([
@@ -990,19 +1065,18 @@ def render_analytics_tab() -> None:
     cache_key = f"analytics_{region}"
     if do_refresh or cache_key not in st.session_state:
         with st.spinner("Computing analytics..."):
-            data = _fetch_analytics(region)
+            data, fetch_err = _fetch_analytics(region)
         if data:
             st.session_state[cache_key] = data
-            st.session_state[f"{cache_key}_ts"] = datetime.utcnow().strftime("%H:%M:%S UTC")
+        st.session_state[f"{cache_key}_err"] = fetch_err
+        st.session_state[f"{cache_key}_ts"] = datetime.utcnow().strftime("%H:%M:%S UTC")
 
     data = st.session_state.get(cache_key)
+    fetch_err = st.session_state.get(f"{cache_key}_err", "")
     ts = st.session_state.get(f"{cache_key}_ts", "—")
 
     if not data:
-        st.markdown(
-            '<div class="stub-page">Analytics unavailable — check API connection</div>',
-            unsafe_allow_html=True,
-        )
+        _error_banner(fetch_err or "No analytics data returned.")
         return
 
     with col_info:
@@ -1129,7 +1203,7 @@ def main() -> None:
     st.markdown(
         '<div class="page-header">'
         '<span class="page-wordmark">AETHER</span>'
-        '<span class="page-version">v0.2-agent · aviation intelligence</span>'
+        '<span class="page-version">v0.3-frontend · aviation intelligence</span>'
         '</div>',
         unsafe_allow_html=True,
     )
