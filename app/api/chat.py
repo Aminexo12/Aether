@@ -1,8 +1,6 @@
-import json
-
 from fastapi import APIRouter
 from langchain_core.messages import HumanMessage
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from app.agents.graph import build_graph
 
@@ -13,6 +11,16 @@ _graph = build_graph()
 
 class ChatRequest(BaseModel):
     message: str
+
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("message cannot be empty")
+        if len(v) > 2000:
+            raise ValueError("message must be 2000 characters or fewer")
+        return v
 
 
 class ChatResponse(BaseModel):

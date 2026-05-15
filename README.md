@@ -1,5 +1,7 @@
 # Aether
 
+![CI](https://github.com/Aminexo12/Aether/actions/workflows/ci.yml/badge.svg?branch=develop)
+
 AI-powered agent for real-time aviation data analysis.
 
 ## What it does

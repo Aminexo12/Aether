@@ -21,12 +21,14 @@ dependencies = [
     "numpy>=2.1",
     "scikit-learn>=1.5",
     "structlog>=24.4",
+    "slowapi>=0.1",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
     "ruff>=0.8",
     "mypy>=1.13",
     "jupyter>=1.1",
@@ -45,3 +47,11 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/rag/ingest.py", "app/ml/train.py", "app/data/aviationstack.py"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 50
