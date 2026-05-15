@@ -1,0 +1,171 @@
+/* ─── Shell ──────────────────────────────────────────────────── */
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+.shell-header {
+  flex-shrink: 0;
+  background: var(--cockpit-surface);
+  border-bottom: 1px solid var(--contrail);
+  position: relative;
+  z-index: 10;
+}
+
+.shell-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 28px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* ─── Wordmark ───────────────────────────────────────────────── */
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.wordmark-name {
+  display: inline-flex;
+  gap: 0;
+  perspective: 400px;
+}
+
+.wordmark-letter {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--high-altitude);
+  will-change: opacity, transform;
+}
+
+.wordmark-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--contrail);
+  flex-shrink: 0;
+}
+
+.wordmark-sub {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--fog);
+  letter-spacing: 0.04em;
+  will-change: opacity;
+}
+
+/* ─── Header right ───────────────────────────────────────────── */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
+}
+
+/* ─── LIVE badge ─────────────────────────────────────────────── */
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.85;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sky-blue);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.live-dot::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: var(--sky-blue);
+  opacity: 0;
+  animation: live-pulse 2.4s ease-out infinite;
+}
+
+@keyframes live-pulse {
+  0%   { transform: scale(1); opacity: 0.5; }
+  70%  { transform: scale(2.8); opacity: 0; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+.live-label {
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--sky-blue);
+}
+
+/* ─── Tabs ───────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  height: 52px;
+}
+
+.tab {
+  position: relative;
+  background: none;
+  border: none;
+  height: 100%;
+  padding: 0 16px;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--fog);
+  cursor: pointer;
+  transition: color var(--motion-micro);
+  will-change: opacity, transform;
+}
+
+.tab:hover    { color: var(--cloud); }
+.tab-active   { color: var(--high-altitude); }
+
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--sky-blue);
+}
+
+/* ─── Main ───────────────────────────────────────────────────── */
+.shell-main {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: var(--deep-space);
+  will-change: opacity, transform;
+}
+
+.tab-panel {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  will-change: opacity, transform, filter;
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .wordmark-letter, .tab, .shell-main { animation: none !important; }
+  .live-dot::before { animation: none !important; }
+  .tab-panel, .tab-indicator { transition: none !important; }
+}

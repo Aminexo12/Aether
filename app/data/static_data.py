@@ -7,20 +7,23 @@ _DATA_DIR = Path(__file__).parent
 
 # Loaded once at import time — O(1) lookups after that
 _airports: dict[str, Airport] = {}
+_airports_icao: dict[str, Airport] = {}
 _airlines: dict[str, Airline] = {}
 
 
-def _load_airports() -> dict[str, Airport]:
-    result: dict[str, Airport] = {}
+def _load_airports() -> tuple[dict[str, Airport], dict[str, Airport]]:
+    by_iata: dict[str, Airport] = {}
+    by_icao: dict[str, Airport] = {}
     with open(_DATA_DIR / "airports.dat", encoding="utf-8") as f:
         for row in csv.reader(f):
             if len(row) < 8:
                 continue
             iata = row[4].strip()
+            icao = row[5].strip() if len(row) > 5 else ""
             if not iata or iata == r"\N":
                 continue
             try:
-                result[iata] = Airport(
+                airport = Airport(
                     iata_code=iata,
                     name=row[1],
                     city=row[2] or None,
@@ -28,9 +31,12 @@ def _load_airports() -> dict[str, Airport]:
                     latitude=float(row[6]),
                     longitude=float(row[7]),
                 )
+                by_iata[iata] = airport
+                if icao and icao != r"\N":
+                    by_icao[icao.upper()] = airport
             except (ValueError, IndexError):
                 continue
-    return result
+    return by_iata, by_icao
 
 
 def _load_airlines() -> dict[str, Airline]:
@@ -55,10 +61,14 @@ def get_airport(iata_code: str) -> Airport | None:
     return _airports.get(iata_code.upper())
 
 
+def get_airport_by_icao(icao_code: str) -> Airport | None:
+    return _airports_icao.get(icao_code.upper())
+
+
 def get_airline(iata_code: str) -> Airline | None:
     return _airlines.get(iata_code.upper())
 
 
 # Load on import
-_airports = _load_airports()
+_airports, _airports_icao = _load_airports()
 _airlines = _load_airlines()

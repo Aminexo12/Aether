@@ -14,6 +14,10 @@ def main() -> None:
     parser.add_argument("--collection", default="flight_docs", help="Qdrant collection name")
     args = parser.parse_args()
 
+
+
+    
+
     folder = Path(args.path)
     pdfs = list(folder.glob("*.pdf"))
     if not pdfs:

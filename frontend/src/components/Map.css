@@ -1,0 +1,188 @@
+/* ─── Container ──────────────────────────────────────────────── */
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--deep-space);
+}
+
+/* ─── Airborne badge ─────────────────────────────────────────── */
+.map-badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--cockpit-surface);
+  border: 1px solid var(--contrail);
+  border-radius: 4px;
+  padding: 10px 14px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.map-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.map-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-badge-dot--amber { background: #F59E0B; }
+.map-badge-dot--grey  { background: #4A5E78; }
+
+.map-badge-count {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--horizon-amber);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  min-width: 40px;
+}
+
+.map-badge-count--secondary {
+  color: var(--fog);
+}
+
+.map-badge-label {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--fog);
+}
+
+/* ─── Refresh indicator ──────────────────────────────────────── */
+.map-refresh {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--fog);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.map-refresh-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--sky-blue);
+  flex-shrink: 0;
+}
+
+/* ─── Error ──────────────────────────────────────────────────── */
+.map-error {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: #ef4444;
+  background: var(--cockpit-surface);
+  border: 1px solid #ef444440;
+  border-radius: 4px;
+  padding: 6px 12px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Tooltip ────────────────────────────────────────────────── */
+.map-tooltip {
+  position: absolute;
+  background: var(--cockpit-surface);
+  border: 1px solid var(--contrail);
+  border-radius: 6px;
+  padding: 10px 14px;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 190px;
+  max-width: 230px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: tooltip-in 120ms ease-out both;
+}
+
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.map-tooltip-callsign {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--horizon-amber);
+  letter-spacing: 0.06em;
+}
+
+.map-tooltip-loading {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--fog);
+  letter-spacing: 0.06em;
+  font-style: italic;
+}
+
+.map-tooltip-route {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.map-tooltip-route-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+}
+
+.map-tooltip-place {
+  color: var(--high-altitude);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.map-tooltip-divider {
+  height: 1px;
+  background: var(--contrail);
+}
+
+.map-tooltip-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.map-tooltip-row {
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--cloud);
+}
+
+.map-tooltip-key {
+  color: var(--fog);
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+  min-width: 32px;
+  padding-top: 1px;
+}

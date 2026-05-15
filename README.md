@@ -1,10 +1,10 @@
-# FlightInsight
+# Aether
 
 AI-powered agent for real-time aviation data analysis.
 
 ## What it does
 
-FlightInsight answers questions about live and historical flight data using a LangGraph agent backed by Claude. It combines:
+Aether answers questions about live and historical flight data using a LangGraph agent backed by Claude. It combines:
 
 - **Live flight tracking** via OpenSky Network (positions, speeds, altitudes)
 - **Flight & airline data** via AviationStack (routes, schedules, airlines, airports)

@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-04T00:00:00Z",
+  "title": "Design System: Aether",
+  "extensions": {
+    "colorMeta": {
+      "deep-space":       { "role": "neutral",   "displayName": "Deep Space",      "canonical": "oklch(8% 0.02 248)",   "tonalRamp": ["#060A12","#0B1120","#10192E","#16223D","#1A2845","#22335A","#2C4070","#3A5290"] },
+      "cockpit-surface":  { "role": "neutral",   "displayName": "Cockpit Surface", "canonical": "oklch(12% 0.025 245)", "tonalRamp": ["#0A1020","#141D2F","#1A2640","#203050","#273A60","#324870","#405882","#506890"] },
+      "instrument-panel": { "role": "neutral",   "displayName": "Instrument Panel","canonical": "oklch(16% 0.03 243)",  "tonalRamp": ["#0E1828","#1A2540","#223050","#2B3D65","#364A78","#425888","#526698","#6278A8"] },
+      "contrail":         { "role": "neutral",   "displayName": "Contrail",        "canonical": "oklch(20% 0.03 242)",  "tonalRamp": ["#121D30","#1E2D47","#28395E","#344878","#404F88","#4C5E98","#5C70A8","#6E84B8"] },
+      "sky-blue":         { "role": "primary",   "displayName": "Sky Blue",        "canonical": "oklch(76% 0.12 218)",  "tonalRamp": ["#0A3A5A","#104E78","#186490","#2280AE","#2EA0D0","#38BDF8","#62CCFA","#A0DEFE"] },
+      "horizon-amber":    { "role": "secondary", "displayName": "Horizon Amber",   "canonical": "oklch(78% 0.14 75)",   "tonalRamp": ["#3D2800","#5A3C00","#7A5200","#9E6B00","#C48400","#F59E0B","#FDBA2C","#FDD472"] },
+      "high-altitude":    { "role": "neutral",   "displayName": "High Altitude",   "canonical": "oklch(92% 0.008 240)", "tonalRamp": ["#2A3545","#3C4E60","#506A82","#6882A0","#8098B8","#9CAECB","#C0CAD8","#E2E8F0"] },
+      "cloud":            { "role": "neutral",   "displayName": "Cloud",           "canonical": "oklch(62% 0.018 240)", "tonalRamp": ["#1E2C3C","#2C3E52","#3C5268","#506882","#668098","#8899AA","#A4B2C0","#C4CED8"] },
+      "fog":              { "role": "neutral",   "displayName": "Fog",             "canonical": "oklch(40% 0.025 240)", "tonalRamp": ["#141E2C","#1E2C3E","#283A52","#344A64","#405A78","#4A5E78","#607690","#7A8EA8"] }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "Page titles and the Aether wordmark only. Rarely used." },
+      "headline": { "displayName": "Headline", "purpose": "Section headers, panel titles, key metrics." },
+      "title":    { "displayName": "Title",    "purpose": "Card headers, navigation items, subsection labels." },
+      "body":     { "displayName": "Body",     "purpose": "Chat responses, RAG content, descriptive prose. Max 65ch line length." },
+      "label":    { "displayName": "Label",    "purpose": "UI chrome labels, button text, status badges, column headers. Always uppercase." },
+      "mono":     { "displayName": "Mono",     "purpose": "ICAO codes, callsigns, coordinates, altitude, velocity, timestamps. All aviation data values." }
+    },
+    "shadows": [
+      { "name": "hover-lift",   "value": "0 4px 20px rgba(0, 0, 0, 0.4)",  "purpose": "Interactive card hover only. Never at rest." },
+      { "name": "modal-float",  "value": "0 24px 48px rgba(0, 0, 0, 0.6)", "purpose": "Modals and drawers floating above all other content." }
+    ],
+    "motion": [
+      { "name": "ease-out-quart", "value": "cubic-bezier(0.25, 0, 0, 1)",  "purpose": "Default easing for all transitions. Smooth, no bounce." },
+      { "name": "micro",          "value": "120ms cubic-bezier(0.25, 0, 0, 1)", "purpose": "Hover color changes, icon swaps, badge state." },
+      { "name": "standard",       "value": "200ms cubic-bezier(0.25, 0, 0, 1)", "purpose": "Button hover lift, border color shifts, focus ring." },
+      { "name": "panel",          "value": "280ms cubic-bezier(0.25, 0, 0, 1)", "purpose": "Panel slides, tab transitions, drawer open/close." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main call-to-action. Sky blue, sharp edges, uppercase label.",
+      "html": "<button class=\"ds-btn-primary\">SEARCH FLIGHTS</button>",
+      "css": ".ds-btn-primary { background: #38BDF8; color: #0B1120; padding: 10px 20px; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-radius: 4px; cursor: pointer; transition: background 200ms cubic-bezier(0.25,0,0,1), transform 200ms cubic-bezier(0.25,0,0,1); } .ds-btn-primary:hover { background: #62CCFA; transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid #38BDF8; outline-offset: 2px; } .ds-btn-primary:disabled { background: #1A2540; color: #4A5E78; cursor: not-allowed; transform: none; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action. Transparent with sky-blue border and text.",
+      "html": "<button class=\"ds-btn-ghost\">VIEW MAP</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #38BDF8; padding: 10px 20px; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid #1E2D47; border-radius: 4px; cursor: pointer; transition: border-color 200ms cubic-bezier(0.25,0,0,1), color 200ms cubic-bezier(0.25,0,0,1); } .ds-btn-ghost:hover { border-color: #38BDF8; color: #62CCFA; } .ds-btn-ghost:focus-visible { outline: 2px solid #38BDF8; outline-offset: 2px; }"
+    },
+    {
+      "name": "Chat Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Primary chat entry field. Full width, focused sky-blue border.",
+      "html": "<div class=\"ds-input-wrapper\"><input class=\"ds-input\" type=\"text\" placeholder=\"Ask about any flight...\"><button class=\"ds-input-send\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M22 2L11 13\" stroke=\"#38BDF8\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M22 2L15 22L11 13L2 9L22 2Z\" stroke=\"#38BDF8\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button></div>",
+      "css": ".ds-input-wrapper { position: relative; display: flex; align-items: center; } .ds-input { width: 100%; background: #141D2F; color: #E2E8F0; padding: 12px 44px 12px 14px; font-family: 'Inter', system-ui, sans-serif; font-size: 0.875rem; border: 1px solid #1E2D47; border-radius: 4px; outline: none; transition: border-color 150ms cubic-bezier(0.25,0,0,1); } .ds-input::placeholder { color: #4A5E78; } .ds-input:focus { border-color: #38BDF8; } .ds-input-send { position: absolute; right: 12px; background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; opacity: 0.7; transition: opacity 150ms; } .ds-input-send:hover { opacity: 1; }"
+    },
+    {
+      "name": "User Message",
+      "kind": "custom",
+      "refersTo": "chat-user",
+      "description": "User message in chat. Elevated surface, full width, labeled YOU.",
+      "html": "<div class=\"ds-msg-user\"><span class=\"ds-msg-label\">YOU</span><p class=\"ds-msg-body\">How many flights are currently over France?</p></div>",
+      "css": ".ds-msg-user { background: #1A2540; border-radius: 4px; padding: 16px; } .ds-msg-label { display: block; font-family: 'JetBrains Mono', Menlo, monospace; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #8899AA; margin-bottom: 8px; } .ds-msg-body { font-family: 'Inter', system-ui, sans-serif; font-size: 0.875rem; line-height: 1.65; color: #E2E8F0; margin: 0; }"
+    },
+    {
+      "name": "Assistant Message",
+      "kind": "custom",
+      "refersTo": "chat-assistant",
+      "description": "Aether response. Distinguished by sky-blue left border, not bubble styling.",
+      "html": "<div class=\"ds-msg-assistant\"><span class=\"ds-msg-label-aether\">AETHER</span><p class=\"ds-msg-body\">Currently tracking <code class=\"ds-code\">847</code> flights over France. The highest altitude is <code class=\"ds-code\">12,497m</code> — Air France <code class=\"ds-code\">AF1234</code> at <code class=\"ds-code\">834 km/h</code>.</p></div>",
+      "css": ".ds-msg-assistant { background: #0B1120; border-left: 2px solid #38BDF8; padding: 16px 16px 16px 18px; } .ds-msg-label-aether { display: block; font-family: 'JetBrains Mono', Menlo, monospace; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #38BDF8; margin-bottom: 8px; } .ds-msg-body { font-family: 'Inter', system-ui, sans-serif; font-size: 0.875rem; line-height: 1.65; color: #E2E8F0; margin: 0; } .ds-code { font-family: 'JetBrains Mono', Menlo, monospace; font-size: 0.8125rem; color: #E2E8F0; background: #1A2540; padding: 1px 5px; border-radius: 2px; }"
+    },
+    {
+      "name": "Tool Call Indicator",
+      "kind": "custom",
+      "refersTo": "chat-assistant",
+      "description": "Shown between messages when the agent is calling a tool. Pure text, no spinner.",
+      "html": "<div class=\"ds-tool-call\"><span class=\"ds-tool-text\">› calling get_live_flights...</span></div>",
+      "css": ".ds-tool-call { padding: 4px 16px 4px 20px; } .ds-tool-text { font-family: 'JetBrains Mono', Menlo, monospace; font-size: 0.75rem; color: #8899AA; letter-spacing: 0.02em; }"
+    },
+    {
+      "name": "Navigation Tabs",
+      "kind": "nav",
+      "description": "Three primary tabs: Chat, Map, Analytics. Underline-only active state.",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-tab ds-tab-active\">CHAT</button><button class=\"ds-tab\">MAP</button><button class=\"ds-tab\">ANALYTICS</button></nav>",
+      "css": ".ds-tabs { display: flex; gap: 0; border-bottom: 1px solid #1E2D47; } .ds-tab { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 12px 20px; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #8899AA; cursor: pointer; transition: color 150ms cubic-bezier(0.25,0,0,1), border-color 150ms cubic-bezier(0.25,0,0,1); } .ds-tab:hover { color: #E2E8F0; } .ds-tab-active { color: #E2E8F0; border-bottom-color: #38BDF8; } .ds-tab:focus-visible { outline: 2px solid #38BDF8; outline-offset: -2px; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "description": "Inline status indicators. Text color carries the signal, not fill.",
+      "html": "<span class=\"ds-badge\">LIVE</span><span class=\"ds-badge ds-badge-anomaly\">ANOMALY</span>",
+      "css": ".ds-badge { display: inline-block; background: #1A2540; padding: 2px 8px; border-radius: 2px; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 0.625rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #38BDF8; } .ds-badge-anomaly { color: #F59E0B; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The High Altitude Instrument",
+    "overview": "Aether's interface takes its language from precision instruments — altimeters, radar screens, navigation displays — not as skeuomorphic recreation but as a philosophy: every element exists to convey information, nothing exists to look impressive. The surface is deep space, the data glows against it, and the operator reads it in a single focused pass.\n\nThe palette is committed. Deep navy owns 70%+ of every screen. Sky blue appears only where it earns it: interactive elements, live data, the cursor of attention. Horizon amber is reserved for anomalies — its rarity is its meaning.\n\nMotion is aircraft-inspired: smooth, directional, deliberate. Nothing bounces. The base state is always still.",
+    "keyCharacteristics": [
+      "Dark as primary, non-negotiable",
+      "Sharp geometry (4px max radius)",
+      "Two-font system: Space Grotesk for UI, JetBrains Mono for data",
+      "Two accents only: sky blue for interaction, horizon amber for anomaly",
+      "Dense by default — whitespace is for rhythm, not emptiness"
+    ],
+    "rules": [
+      { "name": "The Two-Accent Rule",       "body": "Sky blue and horizon amber are the only colors that break from the neutral scale. No purple, no green, no teal, no gradient fills. Adding a third accent is prohibited.", "section": "colors" },
+      { "name": "The Amber Reservation Rule","body": "Horizon amber appears only in response to anomalies or critical warnings. Using it decoratively destroys the signal.", "section": "colors" },
+      { "name": "The Mono Data Rule",        "body": "Every aviation data value — callsign, ICAO code, latitude/longitude, altitude, velocity, timestamp — is rendered in JetBrains Mono. The type itself signals measurement, not description.", "section": "typography" },
+      { "name": "The No-Sentence-Case Label Rule", "body": "Labels and badges are uppercase Space Grotesk. Never title case, never sentence case for UI chrome.", "section": "typography" },
+      { "name": "The Flat-by-Default Rule",  "body": "No element casts a shadow at rest. Shadows appear only on hover (interactive cards) or for modals. Nothing else.", "section": "elevation" },
+      { "name": "The Tonal Ladder Rule",     "body": "Depth increases one step at a time: Deep Space → Cockpit Surface → Instrument Panel. Skipping steps is only permitted for modals.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do render all aviation data values in JetBrains Mono",
+      "Do keep button and badge text uppercase with 0.1em tracking",
+      "Do use only Contrail borders (1px #1E2D47) for structural separation",
+      "Do treat Horizon Amber as a reserved signal for anomalies only",
+      "Do step through the tonal ladder one level at a time",
+      "Do use prefers-reduced-motion to replace translational animations with fades",
+      "Do test legibility for deuteranopia — use labels alongside color signals",
+      "Do load Space Grotesk and JetBrains Mono via Google Fonts custom CSS"
+    ],
+    "donts": [
+      "Don't use white (#ffffff) or pure black (#000000) anywhere",
+      "Don't add a third accent color",
+      "Don't use gradient text (background-clip: text)",
+      "Don't build a generic AI product look — white background, rounded cards, gradient heroes",
+      "Don't recreate the ChatGPT/Claude UI — no alternating message bubbles",
+      "Don't use neon cyberpunk aesthetics — no glowing borders, no animated grids",
+      "Don't use the Notion/Linear off-white cream look",
+      "Don't use corner radius larger than 8px",
+      "Don't use shadows at rest",
+      "Don't use border-left colored stripes decoratively",
+      "Don't use the hero-metric template for any data display",
+      "Don't display identical card grids"
+    ]
+  }
+}

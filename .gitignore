@@ -46,6 +46,14 @@ Thumbs.db
 .idea/
 *.swp
 
+# Node
+node_modules/
+frontend/dist/
+*.log
+
+# Claude Code
+.claude/
+
 # Internal planning docs
 AETHER.md
 CLAUDE.md

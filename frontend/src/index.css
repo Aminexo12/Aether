@@ -1,0 +1,60 @@
+/* ─── Design tokens ──────────────────────────────────────────── */
+:root {
+  --deep-space:       #0B1120;
+  --cockpit-surface:  #141D2F;
+  --instrument-panel: #1A2540;
+  --contrail:         #1E2D47;
+  --sky-blue:         #38BDF8;
+  --sky-blue-hover:   #62CCFA;
+  --horizon-amber:    #F59E0B;
+  --high-altitude:    #E2E8F0;
+  --cloud:            #8899AA;
+  --fog:              #4A5E78;
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', Menlo, monospace;
+
+  --ease: cubic-bezier(0.25, 0, 0, 1);
+  --motion-micro:    120ms cubic-bezier(0.25, 0, 0, 1);
+  --motion-standard: 200ms cubic-bezier(0.25, 0, 0, 1);
+  --motion-panel:    280ms cubic-bezier(0.25, 0, 0, 1);
+}
+
+/* ─── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--deep-space);
+  color: var(--high-altitude);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Typography helpers ─────────────────────────────────────── */
+.font-display { font-family: var(--font-display); }
+.font-mono    { font-family: var(--font-mono); }
+
+.label {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: var(--deep-space); }
+::-webkit-scrollbar-thumb { background: var(--contrail); border-radius: 2px; }
