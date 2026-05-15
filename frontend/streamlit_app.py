@@ -1,7 +1,11 @@
 import html
 import json
 import re
+from datetime import datetime
 
+import pandas as pd
+import plotly.graph_objects as go
+import pydeck as pdk
 import requests
 import streamlit as st
 
@@ -20,6 +24,34 @@ SUGGESTIONS = [
     "EU 261 delay compensation rules?",
     "Any anomalous flights in Europe?",
 ]
+
+_REGION_CODE = {"FRANCE": "FR", "EUROPE": "EU", "WORLD": "WORLD"}
+
+_REGION_VIEW = {
+    "FRANCE": pdk.ViewState(latitude=46.5, longitude=2.3, zoom=5.0),
+    "EUROPE": pdk.ViewState(latitude=50.0, longitude=10.0, zoom=3.5),
+    "WORLD":  pdk.ViewState(latitude=20.0, longitude=0.0,  zoom=1.5),
+}
+
+
+def _fetch_flights(region: str) -> list[dict]:
+    code = _REGION_CODE.get(region, "EU")
+    try:
+        r = requests.get(f"{API_URL}/flights/live", params={"country": code}, timeout=20)
+        r.raise_for_status()
+        return r.json()
+    except Exception:
+        return []
+
+
+def _fetch_analytics(region: str) -> dict | None:
+    code = _REGION_CODE.get(region, "EU")
+    try:
+        r = requests.get(f"{API_URL}/analytics/overview", params={"country": code}, timeout=20)
+        r.raise_for_status()
+        return r.json()
+    except Exception:
+        return None
 
 
 # ── CSS ────────────────────────────────────────────────────────────────────────
@@ -423,6 +455,55 @@ hr { border-color: #1E2D47 !important; margin: 12px 0 !important; }
 [data-testid="stChatInput"] textarea::placeholder { color: #4A5E78 !important; }
 [data-testid="stChatInputSubmitButton"] svg { fill: #38BDF8 !important; }
 
+/* ── Metric cards (map + analytics) ── */
+.metrics-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.metric-card {
+    background: #141D2F;
+    border: 1px solid #1E2D47;
+    border-radius: 4px;
+    padding: 14px 18px;
+    flex: 1;
+    min-width: 110px;
+}
+.metric-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #4A5E78;
+    margin-bottom: 6px;
+}
+.metric-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: #E2E8F0;
+    line-height: 1;
+}
+.metric-value--sky   { color: #38BDF8; }
+.metric-value--amber { color: #F59E0B; }
+.metric-unit {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    color: #4A5E78;
+    margin-left: 4px;
+    letter-spacing: 0.06em;
+}
+.map-info {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    color: #4A5E78;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
 /* ── Stub page ── */
 .stub-page {
     display: flex;
@@ -805,11 +886,230 @@ def render_chat_tab() -> None:
 
 
 def render_map_tab() -> None:
-    st.markdown('<div class="stub-page">MAP — COMING DAY 16</div>', unsafe_allow_html=True)
+    region = st.session_state.get("region", "EUROPE")
+
+    col_info, col_btn = st.columns([6, 1])
+    with col_btn:
+        do_refresh = st.button("REFRESH", type="primary", use_container_width=True, key="map_refresh")
+
+    cache_key = f"map_{region}"
+    if do_refresh or cache_key not in st.session_state:
+        with st.spinner("Fetching live flights..."):
+            flights = _fetch_flights(region)
+        st.session_state[cache_key] = flights
+        st.session_state[f"{cache_key}_ts"] = datetime.utcnow().strftime("%H:%M:%S UTC")
+
+    flights = st.session_state.get(cache_key, [])
+    ts = st.session_state.get(f"{cache_key}_ts", "—")
+
+    valid = [f for f in flights if f.get("latitude") and f.get("longitude")]
+    total = len(flights)
+    airborne = sum(1 for f in valid if not f.get("on_ground"))
+
+    st.markdown(
+        f'<div class="metrics-row">'
+        f'<div class="metric-card"><div class="metric-label">TOTAL FLIGHTS</div>'
+        f'<div class="metric-value">{total:,}</div></div>'
+        f'<div class="metric-card"><div class="metric-label">AIRBORNE</div>'
+        f'<div class="metric-value metric-value--sky">{airborne:,}</div></div>'
+        f'<div class="metric-card"><div class="metric-label">ON GROUND</div>'
+        f'<div class="metric-value metric-value--amber">{total - airborne:,}</div></div>'
+        f'<div class="metric-card"><div class="metric-label">REGION</div>'
+        f'<div class="metric-value" style="font-size:1rem;letter-spacing:0.04em">{region}</div></div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    with col_info:
+        st.markdown(
+            f'<div class="map-info">Last updated: {ts} · {len(valid)} positioned flights</div>',
+            unsafe_allow_html=True,
+        )
+
+    if not valid:
+        st.markdown(
+            '<div class="stub-page">No flight data — check API connection</div>',
+            unsafe_allow_html=True,
+        )
+        return
+
+    df = pd.DataFrame([
+        {
+            "lat": f["latitude"],
+            "lon": f["longitude"],
+            "callsign": (f.get("callsign") or "").strip() or f["icao24"],
+            "country": f.get("origin_country", ""),
+            "altitude_m": int(f.get("baro_altitude") or 0),
+            "speed_kmh": int((f.get("velocity") or 0) * 3.6),
+            "on_ground": f.get("on_ground", False),
+            "color": [245, 158, 11, 160] if f.get("on_ground") else [56, 189, 248, 180],
+            "radius": 3000 if f.get("on_ground") else 5500,
+        }
+        for f in valid
+    ])
+
+    layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=df,
+        get_position=["lon", "lat"],
+        get_radius="radius",
+        get_fill_color="color",
+        pickable=True,
+        auto_highlight=True,
+        highlight_color=[255, 255, 255, 60],
+    )
+
+    deck = pdk.Deck(
+        layers=[layer],
+        initial_view_state=_REGION_VIEW.get(region, _REGION_VIEW["EUROPE"]),
+        map_style="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+        tooltip={
+            "html": "<b>{callsign}</b><br/>Country: {country}<br/>Alt: {altitude_m} m · Speed: {speed_kmh} km/h",
+            "style": {
+                "backgroundColor": "#141D2F",
+                "color": "#E2E8F0",
+                "fontFamily": "'JetBrains Mono', monospace",
+                "fontSize": "12px",
+                "border": "1px solid #1E2D47",
+                "borderRadius": "4px",
+                "padding": "8px 12px",
+            },
+        },
+    )
+
+    st.pydeck_chart(deck, use_container_width=True)
 
 
 def render_analytics_tab() -> None:
-    st.markdown('<div class="stub-page">ANALYTICS — COMING DAY 17</div>', unsafe_allow_html=True)
+    region = st.session_state.get("region", "EUROPE")
+
+    col_info, col_btn = st.columns([6, 1])
+    with col_btn:
+        do_refresh = st.button("REFRESH", type="primary", use_container_width=True, key="analytics_refresh")
+
+    cache_key = f"analytics_{region}"
+    if do_refresh or cache_key not in st.session_state:
+        with st.spinner("Computing analytics..."):
+            data = _fetch_analytics(region)
+        if data:
+            st.session_state[cache_key] = data
+            st.session_state[f"{cache_key}_ts"] = datetime.utcnow().strftime("%H:%M:%S UTC")
+
+    data = st.session_state.get(cache_key)
+    ts = st.session_state.get(f"{cache_key}_ts", "—")
+
+    if not data:
+        st.markdown(
+            '<div class="stub-page">Analytics unavailable — check API connection</div>',
+            unsafe_allow_html=True,
+        )
+        return
+
+    with col_info:
+        st.markdown(
+            f'<div class="map-info">Last updated: {ts} · {region}</div>',
+            unsafe_allow_html=True,
+        )
+
+    avg_spd = f"{data['avg_speed_kmh']:,.0f}" if data["avg_speed_kmh"] else "—"
+    avg_alt = f"{data['avg_altitude_m']:,.0f}" if data["avg_altitude_m"] else "—"
+
+    st.markdown(
+        f'<div class="metrics-row">'
+        f'<div class="metric-card"><div class="metric-label">TOTAL FLIGHTS</div>'
+        f'<div class="metric-value">{data["total"]:,}</div></div>'
+        f'<div class="metric-card"><div class="metric-label">AIRBORNE</div>'
+        f'<div class="metric-value metric-value--sky">{data["airborne"]:,}</div></div>'
+        f'<div class="metric-card"><div class="metric-label">ON GROUND</div>'
+        f'<div class="metric-value metric-value--amber">{data["on_ground"]:,}</div></div>'
+        f'<div class="metric-card"><div class="metric-label">AVG SPEED</div>'
+        f'<div class="metric-value">{avg_spd}<span class="metric-unit">km/h</span></div></div>'
+        f'<div class="metric-card"><div class="metric-label">AVG ALTITUDE</div>'
+        f'<div class="metric-value">{avg_alt}<span class="metric-unit">m</span></div></div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ── Shared Plotly theme ──
+    _CARD = "#141D2F"
+    _GRID = "#1E2D47"
+    _TEXT = "#8899AA"
+    _SKY  = "#38BDF8"
+    _AMBER = "#F59E0B"
+
+    def _base_layout(**overrides) -> dict:
+        return {
+            "paper_bgcolor": _CARD,
+            "plot_bgcolor": _CARD,
+            "font": {"family": "JetBrains Mono, monospace", "size": 11, "color": _TEXT},
+            "margin": {"l": 8, "r": 8, "t": 36, "b": 8},
+            "showlegend": False,
+            **overrides,
+        }
+
+    col1, col2 = st.columns([3, 2])
+
+    with col1:
+        countries = data.get("top_countries", [])
+        if countries:
+            fig = go.Figure(go.Bar(
+                x=[c["count"] for c in countries],
+                y=[c["country"] for c in countries],
+                orientation="h",
+                marker_color=[
+                    _AMBER if i == 0 else f"rgba(56,189,248,{max(0.3, 0.75 - i * 0.06):.2f})"
+                    for i in range(len(countries))
+                ],
+                hovertemplate="%{y}: %{x} flights<extra></extra>",
+            ))
+            fig.update_layout(
+                **_base_layout(
+                    title={"text": "TOP COUNTRIES", "font": {"size": 10, "color": _TEXT}, "x": 0},
+                    height=320,
+                ),
+                xaxis={"gridcolor": _GRID, "linecolor": _GRID, "title": None},
+                yaxis={"gridcolor": _GRID, "linecolor": _GRID, "title": None, "autorange": "reversed"},
+            )
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+    with col2:
+        alt_bins = data.get("altitude_dist", [])
+        if alt_bins:
+            fig = go.Figure(go.Bar(
+                x=[b["label"] for b in alt_bins],
+                y=[b["count"] for b in alt_bins],
+                marker_color=_SKY,
+                marker_opacity=0.75,
+                hovertemplate="%{x}: %{y} flights<extra></extra>",
+            ))
+            fig.update_layout(
+                **_base_layout(
+                    title={"text": "ALTITUDE DISTRIBUTION", "font": {"size": 10, "color": _TEXT}, "x": 0},
+                    height=200,
+                ),
+                xaxis={"gridcolor": _GRID, "linecolor": _GRID, "title": None, "tickfont": {"size": 9}},
+                yaxis={"gridcolor": _GRID, "linecolor": _GRID, "title": None},
+            )
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+        spd_bins = data.get("speed_dist", [])
+        if spd_bins:
+            fig = go.Figure(go.Bar(
+                x=[b["label"] for b in spd_bins],
+                y=[b["count"] for b in spd_bins],
+                marker_color=_AMBER,
+                marker_opacity=0.75,
+                hovertemplate="%{x}: %{y} flights<extra></extra>",
+            ))
+            fig.update_layout(
+                **_base_layout(
+                    title={"text": "SPEED DISTRIBUTION", "font": {"size": 10, "color": _TEXT}, "x": 0},
+                    height=200,
+                ),
+                xaxis={"gridcolor": _GRID, "linecolor": _GRID, "title": None, "tickfont": {"size": 9}},
+                yaxis={"gridcolor": _GRID, "linecolor": _GRID, "title": None},
+            )
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
