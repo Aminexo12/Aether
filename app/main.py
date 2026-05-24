@@ -74,29 +74,42 @@ class ChatRequest(BaseModel):
 @limiter.limit("10/minute")
 async def chat_stream(request: Request, body: ChatRequest):
     async def event_stream():
-        async for event in _graph.astream_events(
-            {
-                "messages": [HumanMessage(content=body.message)],
-                "intent": "",
-                "tool_results": [],
-            },
-            version="v2",
-        ):
-            kind = event["event"]
-            meta = event.get("metadata", {})
+        try:
+            async for event in _graph.astream_events(
+                {
+                    "messages": [HumanMessage(content=body.message)],
+                    "intent": "",
+                    "tool_results": [],
+                },
+                version="v2",
+            ):
+                kind = event["event"]
+                meta = event.get("metadata", {})
 
-            if kind == "on_chain_end" and event.get("name") == "classify":
-                output = event.get("data", {}).get("output") or {}
-                intent = output.get("intent", "")
-                if intent:
-                    yield f"data: {json.dumps({'type': 'intent', 'value': intent})}\n\n"
+                if kind == "on_chain_end" and event.get("name") == "classify":
+                    output = event.get("data", {}).get("output") or {}
+                    intent = output.get("intent", "")
+                    if intent:
+                        yield f"data: {json.dumps({'type': 'intent', 'value': intent})}\n\n"
 
-            if kind == "on_chat_model_stream" and meta.get("langgraph_node") == "synthesize":
-                chunk = event["data"].get("chunk")
-                if chunk and chunk.content:
-                    yield f"data: {json.dumps({'type': 'token', 'content': chunk.content})}\n\n"
+                if kind == "on_chat_model_stream" and meta.get("langgraph_node") == "synthesize":
+                    chunk = event["data"].get("chunk")
+                    if chunk and chunk.content:
+                        yield f"data: {json.dumps({'type': 'token', 'content': chunk.content})}\n\n"
 
-        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                # decline_node returns its message in one shot (no LLM streaming).
+                # Emit it as a single token chunk so the frontend renders it normally.
+                if kind == "on_chain_end" and event.get("name") == "decline":
+                    output = event.get("data", {}).get("output") or {}
+                    messages = output.get("messages") or []
+                    if messages:
+                        yield f"data: {json.dumps({'type': 'token', 'content': messages[-1].content})}\n\n"
+
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        except Exception:
+            # Log full detail server-side; emit a generic signal to the client.
+            _log.exception("chat_stream_failed")
+            yield f"data: {json.dumps({'type': 'error'})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 

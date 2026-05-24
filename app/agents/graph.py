@@ -5,6 +5,7 @@ from app.agents.nodes import (
     analytics_tool_node,
     anomaly_tool_node,
     classify_node,
+    decline_node,
     live_tool_node,
     rag_tool_node,
     synthesize_node,
@@ -19,6 +20,7 @@ def _route_after_classify(state: AgentState) -> str:
         "HYBRID": "live_tool",
         "ANALYTICS": "analytics_tool",
         "ANOMALY": "anomaly_tool",
+        "OUT_OF_SCOPE": "decline",
     }.get(intent, "rag_tool")
 
 
@@ -37,6 +39,7 @@ def build_graph() -> StateGraph:
     graph.add_node("rag_tool", rag_tool_node)
     graph.add_node("analytics_tool", analytics_tool_node)
     graph.add_node("anomaly_tool", anomaly_tool_node)
+    graph.add_node("decline", decline_node)
     graph.add_node("synthesize", synthesize_node)
 
     graph.add_edge(START, "classify")
@@ -48,6 +51,7 @@ def build_graph() -> StateGraph:
             "rag_tool": "rag_tool",
             "analytics_tool": "analytics_tool",
             "anomaly_tool": "anomaly_tool",
+            "decline": "decline",
         },
     )
     graph.add_conditional_edges(
@@ -58,6 +62,7 @@ def build_graph() -> StateGraph:
     graph.add_edge("rag_tool", "synthesize")
     graph.add_edge("analytics_tool", "synthesize")
     graph.add_edge("anomaly_tool", "synthesize")
+    graph.add_edge("decline", END)
     graph.add_edge("synthesize", END)
 
     return graph.compile()

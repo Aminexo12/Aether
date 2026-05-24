@@ -25,6 +25,11 @@ class Bin(BaseModel):
     count: int
 
 
+class FlightStat(BaseModel):
+    callsign: str
+    value: float
+
+
 class AnalyticsOverview(BaseModel):
     total: int
     airborne: int
@@ -35,6 +40,11 @@ class AnalyticsOverview(BaseModel):
     top_countries: list[CountryCount]
     altitude_dist: list[Bin]
     speed_dist: list[Bin]
+    climbing: int
+    level: int
+    descending: int
+    fastest: FlightStat | None
+    highest: FlightStat | None
 
 
 @router.get("/overview", response_model=AnalyticsOverview)
@@ -75,6 +85,7 @@ async def get_overview(
             total=0, airborne=0, on_ground=0, airborne_pct=0.0,
             avg_speed_kmh=None, avg_altitude_m=None,
             top_countries=[], altitude_dist=[], speed_dist=[],
+            climbing=0, level=0, descending=0, fastest=None, highest=None,
         )
 
     total = len(flights)
@@ -123,6 +134,33 @@ async def get_overview(
         for label, lo, hi in speed_bins
     ]
 
+    # Vertical rate breakdown
+    climbing = sum(1 for f in flights if not f.on_ground and f.vertical_rate and f.vertical_rate > 1.0)
+    descending = sum(1 for f in flights if not f.on_ground and f.vertical_rate and f.vertical_rate < -1.0)
+    level = airborne - climbing - descending
+
+    # Fastest airborne flight
+    airborne_with_speed = [f for f in flights if not f.on_ground and f.velocity]
+    if airborne_with_speed:
+        f_fast = max(airborne_with_speed, key=lambda f: f.velocity)
+        fastest = FlightStat(
+            callsign=((f_fast.callsign or "").strip() or f_fast.icao24),
+            value=round(f_fast.velocity * 3.6, 1),
+        )
+    else:
+        fastest = None
+
+    # Highest airborne flight
+    airborne_with_alt = [f for f in flights if not f.on_ground and f.baro_altitude and f.baro_altitude > 0]
+    if airborne_with_alt:
+        f_high = max(airborne_with_alt, key=lambda f: f.baro_altitude)
+        highest = FlightStat(
+            callsign=((f_high.callsign or "").strip() or f_high.icao24),
+            value=round(f_high.baro_altitude, 0),
+        )
+    else:
+        highest = None
+
     return AnalyticsOverview(
         total=total,
         airborne=airborne,
@@ -133,4 +171,9 @@ async def get_overview(
         top_countries=top_countries,
         altitude_dist=altitude_dist,
         speed_dist=speed_dist,
+        climbing=climbing,
+        level=level,
+        descending=descending,
+        fastest=fastest,
+        highest=highest,
     )
