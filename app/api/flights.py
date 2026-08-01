@@ -14,7 +14,12 @@ from app.data.models import (
     Flight,
 )
 from app.data.opensky import OpenSkyClient
-from app.data.static_data import get_airline, get_airport, get_airport_by_icao
+from app.data.static_data import (
+    get_airline,
+    get_airline_icao3_index,
+    get_airport,
+    get_airport_by_icao,
+)
 from app.utils.cache import TTLCache
 
 _lookup_cache = TTLCache()
@@ -70,6 +75,12 @@ async def get_airport_route(iata_code: str):
     if airport is None:
         raise HTTPException(status_code=404, detail=f"Airport '{iata_code.upper()}' not found")
     return airport
+
+
+@router.get("/airlines/index", response_model=dict[str, str])
+async def get_airlines_index():
+    """ICAO3 code → airline name. Used by frontend to resolve callsign prefixes."""
+    return get_airline_icao3_index()
 
 
 @router.get("/airlines/{iata_code}", response_model=Airline)
