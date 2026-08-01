@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { Send, ArrowUpRight } from 'lucide-react'
 import gsap from 'gsap'
 import { useChat } from '../hooks/useChat'
-import RadarBackground from './RadarBackground'
-import Boeing737 from './Boeing737'
+import LiveStatus from './LiveStatus'
+import FactTicker from './FactTicker'
+import RadarScope from './RadarScope'
 import { launchPlane } from './launchPlane'
 import './Chat.css'
 
@@ -24,11 +26,22 @@ const SUGGESTIONS = [
   'Which airlines have the most flights today?',
 ]
 
+// Role-aware entrance: user slides in from the left, assistant pops in from
+// the right with a small scale-up — gives the chat a directional feel
+// without going full chat-bubble cliche.
 const msgVariants = {
-  hidden:  { opacity: 0, y: 12, filter: 'blur(6px)' },
+  hidden:  (role: string) => ({
+    opacity: 0,
+    x: role === 'user' ? -18 : 18,
+    scale: role === 'assistant' ? 0.94 : 1,
+    filter: 'blur(4px)',
+  }),
   visible: {
-    opacity: 1, y: 0, filter: 'blur(0px)',
-    transition: { duration: 0.28, ease: [0.25, 0, 0, 1] as const },
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { duration: 0.32, ease: [0.25, 0, 0, 1] as const },
   },
 }
 
@@ -108,16 +121,16 @@ export default function Chat() {
   const isEmpty = messages.length === 0
 
   return (
-    <div className="chat">
+    <div className="chat-shell">
+      <RadarScope />
+      <div className="chat">
       <div className="chat-messages">
 
         {/* ── Empty state ── */}
         {isEmpty && (
           <div className="chat-empty">
-            <RadarBackground />
             <div className="chat-empty-content">
-              {/* Boeing 737 hero */}
-              <Boeing737 />
+              <LiveStatus />
 
               <p className="chat-empty-heading">What's happening in the sky?</p>
               <p className="chat-empty-sub">Real-time data · EU regulations · Anomaly detection</p>
@@ -142,6 +155,8 @@ export default function Chat() {
                   </motion.button>
                 ))}
               </motion.div>
+
+              <FactTicker />
             </div>
           </div>
         )}
@@ -153,6 +168,7 @@ export default function Chat() {
               key={msg.id}
               className={`msg msg-${msg.role}`}
               variants={msgVariants}
+              custom={msg.role}
               initial="hidden"
               animate="visible"
             >
@@ -162,9 +178,15 @@ export default function Chat() {
               {msg.role === 'assistant' ? (
                 <div className="msg-body prose">
                   <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
                     components={{
                       code: ({ children }) => (
                         <code className="inline-code">{children}</code>
+                      ),
+                      table: ({ children }) => (
+                        <div className="md-table-wrap">
+                          <table className="md-table">{children}</table>
+                        </div>
                       ),
                     }}
                   >
@@ -257,6 +279,7 @@ export default function Chat() {
             <Send size={14} strokeWidth={2} />
           </motion.button>
         </motion.div>
+      </div>
       </div>
     </div>
   )

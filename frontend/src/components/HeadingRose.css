@@ -1,0 +1,24 @@
+/*
+ * Polar compass rose styling. SVG component, so most of the look comes from
+ * the SVG itself; this file mainly handles text labels.
+ */
+
+.rose {
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  display: block;
+}
+
+.rose-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--cloud);
+  letter-spacing: 0.06em;
+}
+
+.rose-label--primary {
+  fill: var(--high-altitude);
+  font-weight: 600;
+  font-size: 10px;
+}

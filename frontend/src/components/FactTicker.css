@@ -1,0 +1,55 @@
+/*
+ * Rotating aviation-knowledge ticker for the chat empty state.
+ * Subtle ambient creative element — instructs without decorating.
+ */
+
+.fact-ticker {
+  position: relative;
+  min-height: 22px;
+  max-width: 520px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.fact-line {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: var(--cloud);
+  line-height: 1.45;
+  text-align: center;
+}
+
+.fact-tag {
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sky-blue);
+  background-color: var(--instrument-panel);
+  padding: 2px 7px;
+  border-radius: 2px;
+  white-space: nowrap;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.fact-body {
+  color: var(--cloud);
+  font-style: italic;
+}
+
+@media (max-width: 540px) {
+  .fact-line { font-size: 0.625rem; flex-direction: column; gap: 6px; }
+  .fact-ticker { min-height: 44px; }
+}

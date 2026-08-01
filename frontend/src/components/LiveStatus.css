@@ -1,0 +1,70 @@
+/*
+ * Discreet live-feed status line for the chat empty state.
+ * Replaces the bigger AltitudeStrata hero — the chat surface is the focal
+ * element here, this just confirms the system is alive.
+ */
+
+.live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  background-color: var(--cockpit-surface);
+  border: 1px solid var(--contrail);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--cloud);
+  text-transform: uppercase;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.live-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--sky-blue);
+  flex-shrink: 0;
+  animation: live-pulse 2.6s ease-in-out infinite;
+}
+
+.live-status-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  white-space: nowrap;
+}
+
+.live-status-num {
+  color: var(--high-altitude);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.live-status-sep {
+  color: var(--fog);
+}
+
+.live-status-time {
+  color: var(--fog);
+  font-size: 0.625rem;
+  padding-left: 8px;
+  border-left: 1px solid var(--contrail);
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.7); }
+}
+
+@media (max-width: 540px) {
+  .live-status { font-size: 0.625rem; padding: 6px 12px; gap: 8px; }
+  .live-status-time { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-status-dot { animation: none; }
+}

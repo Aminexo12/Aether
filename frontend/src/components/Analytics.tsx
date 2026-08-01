@@ -7,6 +7,7 @@ import './Analytics.css'
 
 type CountryCount = { country: string; count: number }
 type Bin          = { label: string; count: number }
+type FlightStat   = { callsign: string; value: number }
 
 type Overview = {
   total: number
@@ -18,6 +19,11 @@ type Overview = {
   top_countries: CountryCount[]
   altitude_dist: Bin[]
   speed_dist: Bin[]
+  climbing: number
+  level: number
+  descending: number
+  fastest: FlightStat | null
+  highest: FlightStat | null
 }
 
 const REFRESH_MS = 60_000
@@ -100,6 +106,23 @@ export default function Analytics() {
         <StatCard
           label="AVG ALTITUDE"
           value={data.avg_altitude_m != null ? Math.round(data.avg_altitude_m).toLocaleString() : '—'}
+          unit=" m"
+        />
+      </div>
+
+      {/* ── Vertical-state breakdown + extremes ── */}
+      <div className="stat-row">
+        <StatCard label="CLIMBING"   value={data.climbing.toLocaleString()} />
+        <StatCard label="LEVEL"      value={data.level.toLocaleString()} />
+        <StatCard label="DESCENDING" value={data.descending.toLocaleString()} />
+        <StatCard
+          label={`FASTEST · ${data.fastest?.callsign ?? '—'}`}
+          value={data.fastest != null ? Math.round(data.fastest.value).toLocaleString() : '—'}
+          unit=" km/h"
+        />
+        <StatCard
+          label={`HIGHEST · ${data.highest?.callsign ?? '—'}`}
+          value={data.highest != null ? Math.round(data.highest.value).toLocaleString() : '—'}
           unit=" m"
         />
       </div>

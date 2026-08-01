@@ -1,0 +1,176 @@
+/*
+ * Star field — pure CSS animation, three star classes plus meteors + sparks.
+ * No canvas, no rAF loop, no JS animation.
+ */
+
+.star-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  cursor: crosshair;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(56, 145, 200, 0.10), transparent 65%),
+    radial-gradient(ellipse 60% 50% at 110% 110%, rgba(56, 145, 200, 0.05), transparent 60%),
+    radial-gradient(ellipse 50% 40% at -10% 80%, rgba(120, 100, 180, 0.04), transparent 55%),
+    #0B1120;
+}
+
+/* ──── Base star ──── */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation-name: star-drift, star-twinkle;
+  animation-duration: var(--drift-dur, 40s), 3.6s;
+  animation-timing-function: ease-in-out, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-direction: alternate, normal;
+}
+
+/* ──── Class: pinprick (tiny, common) ──── */
+.star--pinprick {
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.45);
+}
+
+/* ──── Class: medium (soft halo, gentle pulse) ──── */
+.star--medium {
+  box-shadow:
+    0 0 4px rgba(255, 255, 255, 0.65),
+    0 0 10px rgba(180, 210, 240, 0.25);
+  animation-name: star-drift, star-pulse;
+  animation-duration: var(--drift-dur, 40s), 4.4s;
+}
+
+/* ──── Class: beacon (bright, with diffraction spikes) ──── */
+.star--beacon {
+  box-shadow:
+    0 0 6px rgba(255, 255, 255, 0.85),
+    0 0 14px rgba(180, 215, 245, 0.55),
+    0 0 28px rgba(140, 200, 240, 0.25);
+  animation-name: star-drift, beacon-pulse;
+  animation-duration: var(--drift-dur, 40s), 5.6s;
+}
+
+/* Diffraction spikes — horizontal + vertical thin gradients */
+.star--beacon::before,
+.star--beacon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: linear-gradient(
+    var(--spike-dir, to right),
+    transparent 0%,
+    rgba(255, 255, 255, 0.85) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.star--beacon::before {
+  --spike-dir: to right;
+  width: 22px;
+  height: 1px;
+  transform: translate(-50%, -50%);
+}
+
+.star--beacon::after {
+  --spike-dir: to bottom;
+  width: 1px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+}
+
+/* ──── Keyframes ──── */
+@keyframes star-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(var(--dx, 0px), var(--dy, 0px)); }
+}
+
+@keyframes star-twinkle {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.5); }
+}
+
+@keyframes star-pulse {
+  0%, 100% { filter: brightness(1)   opacity(1); }
+  50%      { filter: brightness(1.6) opacity(0.78); }
+}
+
+@keyframes beacon-pulse {
+  0%, 100% { filter: brightness(1)    opacity(1); }
+  50%      { filter: brightness(1.75) opacity(0.85); }
+}
+
+/* ──── Spawned beacons: ignition burst ──── */
+.star--spawn {
+  animation: star-spawn 720ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.95),
+    0 0 24px rgba(160, 210, 250, 0.7),
+    0 0 44px rgba(140, 200, 240, 0.35);
+}
+
+@keyframes star-spawn {
+  0%   { transform: scale(3.2); opacity: 1; }
+  55%  { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* ──── Meteor streak — diagonal contrail ──── */
+.meteor {
+  position: absolute;
+  height: 1.5px;
+  transform-origin: 0 50%;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.0)  4%,
+    rgba(255, 255, 255, 0.85) 70%,
+    rgba(230, 245, 255, 1)    98%,
+    transparent 100%
+  );
+  filter: drop-shadow(0 0 4px rgba(180, 220, 255, 0.85));
+  animation: meteor-fly linear forwards;
+  opacity: 0;
+}
+
+@keyframes meteor-fly {
+  0%   { opacity: 0; transform: rotate(var(--rot, 40deg)) translateX(-20vw); }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--rot, 40deg)) translateX(120vw); }
+}
+
+/* ──── Click-burst sparks ──── */
+.spark {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  margin: -1px 0 0 -1px;
+  border-radius: 50%;
+  background: rgb(255, 240, 220);
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(255, 220, 170, 0.85);
+  animation: spark-fly 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes spark-fly {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--spark-tx, 0px), var(--spark-ty, 0px)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* ──── Reduced motion ──── */
+@media (prefers-reduced-motion: reduce) {
+  .star, .meteor, .spark { animation: none; }
+  .star--spawn { animation: star-spawn 700ms ease-out forwards; }
+}

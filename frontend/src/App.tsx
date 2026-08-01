@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import gsap from 'gsap'
+import Hero from './components/Hero'
 import Chat from './components/Chat'
 import Map from './components/Map'
 import Analytics from './components/Analytics'
 import './App.css'
 
-type Tab = 'chat' | 'map' | 'analytics'
+export type Tab = 'chat' | 'map' | 'analytics'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'chat',      label: 'CHAT' },
@@ -17,11 +18,13 @@ const TABS: { id: Tab; label: string }[] = [
 const TAB_INDEX: Record<Tab, number> = { chat: 0, map: 1, analytics: 2 }
 
 export default function App() {
+  const [entered, setEntered] = useState(false)
   const [active, setActive] = useState<Tab>('chat')
   const prevRef = useRef<Tab>('chat')
 
   // GSAP entrance: letters stagger, then subtitle, then tabs, then content
   useEffect(() => {
+    if (!entered) return
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
     tl.fromTo('.wordmark-letter',
@@ -43,7 +46,13 @@ export default function App() {
       { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', clearProps: 'transform' },
       '-=0.15'
     )
-  }, [])
+  }, [entered])
+
+  const handleEnter = (tab: Tab) => {
+    prevRef.current = tab
+    setActive(tab)
+    setEntered(true)
+  }
 
   const handleTabChange = (tab: Tab) => {
     prevRef.current = active
@@ -51,6 +60,10 @@ export default function App() {
   }
 
   const direction = TAB_INDEX[active] >= TAB_INDEX[prevRef.current] ? 1 : -1
+
+  if (!entered) {
+    return <Hero onEnter={handleEnter} />
+  }
 
   return (
     <div className="shell">
