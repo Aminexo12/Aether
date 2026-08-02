@@ -1,10 +1,12 @@
 import json
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -42,9 +44,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(flights_router)
-app.include_router(chat_router)
-app.include_router(analytics_router)
+app.include_router(flights_router, prefix="/api")
+app.include_router(chat_router, prefix="/api")
+app.include_router(analytics_router, prefix="/api")
 
 
 @app.middleware("http")
@@ -70,7 +72,7 @@ class ChatRequest(BaseModel):
         return v
 
 
-@app.post("/chat/stream")
+@app.post("/api/chat/stream")
 @limiter.limit("10/minute")
 async def chat_stream(request: Request, body: ChatRequest):
     async def event_stream():
@@ -114,24 +116,33 @@ async def chat_stream(request: Request, body: ChatRequest):
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
-@app.get("/")
-def root():
-    return {
-        "name": "Aether API",
-        "version": app.version,
-        "docs": "/docs",
-        "endpoints": [
-            "GET  /health",
-            "GET  /flights/live",
-            "GET  /flights/airports/{iata_code}",
-            "GET  /flights/airlines/{iata_code}",
-            "POST /chat/",
-            "POST /chat/stream",
-            "GET  /analytics/overview",
-        ],
-    }
-
-
 @app.get("/health")
 def health():
     return {"status": "ok", "version": app.version}
+
+
+# In production the built React app (frontend/dist) is served from the same
+# origin as the API: /api/* hits the backend, everything else serves the SPA.
+# When the build is absent (local dev / tests) we expose a JSON index at /.
+_FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
+if _FRONTEND_DIST.is_dir():
+    app.mount("/", StaticFiles(directory=str(_FRONTEND_DIST), html=True), name="frontend")
+else:
+
+    @app.get("/")
+    def root():
+        return {
+            "name": "Aether API",
+            "version": app.version,
+            "docs": "/docs",
+            "endpoints": [
+                "GET  /health",
+                "GET  /api/flights/live",
+                "GET  /api/flights/airports/{iata_code}",
+                "GET  /api/flights/airlines/{iata_code}",
+                "POST /api/chat/",
+                "POST /api/chat/stream",
+                "GET  /api/analytics/overview",
+            ],
+        }

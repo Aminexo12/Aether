@@ -37,7 +37,7 @@ def mock_opensky():
 @pytest.mark.asyncio
 async def test_overview_totals(mock_opensky):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        r = await client.get("/analytics/overview?country=EU")
+        r = await client.get("/api/analytics/overview?country=EU")
     assert r.status_code == 200
     data = r.json()
     assert data["total"] == 13
@@ -48,7 +48,7 @@ async def test_overview_totals(mock_opensky):
 @pytest.mark.asyncio
 async def test_overview_top_countries(mock_opensky):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        r = await client.get("/analytics/overview?country=EU")
+        r = await client.get("/api/analytics/overview?country=EU")
     data = r.json()
     countries = {c["country"]: c["count"] for c in data["top_countries"]}
     assert countries["France"] == 9   # 8 airborne + 1 on ground
@@ -59,7 +59,7 @@ async def test_overview_top_countries(mock_opensky):
 async def test_overview_empty(mock_opensky):
     mock_opensky.return_value = []
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        r = await client.get("/analytics/overview?country=FR")
+        r = await client.get("/api/analytics/overview?country=FR")
     assert r.status_code == 200
     data = r.json()
     assert data["total"] == 0
@@ -69,12 +69,12 @@ async def test_overview_empty(mock_opensky):
 @pytest.mark.asyncio
 async def test_overview_invalid_country(mock_opensky):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        r = await client.get("/analytics/overview?country=XX")
+        r = await client.get("/api/analytics/overview?country=XX")
     assert r.status_code == 400
 
 
 @pytest.mark.asyncio
 async def test_overview_both_params_rejected(mock_opensky):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        r = await client.get("/analytics/overview?country=FR&bbox=41,2,51,9")
+        r = await client.get("/api/analytics/overview?country=FR&bbox=41,2,51,9")
     assert r.status_code == 400
