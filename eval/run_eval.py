@@ -19,7 +19,7 @@ DATASET = Path(__file__).parent / "dataset.jsonl"
 
 
 def load_dataset(ids: list[int] | None = None) -> list[dict]:
-    rows = [json.loads(l) for l in DATASET.read_text(encoding="utf-8").splitlines() if l.strip()]
+    rows = [json.loads(line) for line in DATASET.read_text(encoding="utf-8").splitlines() if line.strip()]
     if ids:
         rows = [r for r in rows if r["id"] in ids]
     return rows
