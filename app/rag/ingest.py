@@ -24,7 +24,7 @@ def _get_model() -> SentenceTransformer:
 
 
 def _get_qdrant() -> QdrantClient:
-    return QdrantClient(url=settings.qdrant_url)
+    return QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key or None)
 
 
 def _ensure_collection(client: QdrantClient, collection: str) -> None:

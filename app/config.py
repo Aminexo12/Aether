@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     langsmith_api_key: str = ""
 
     qdrant_url: str = "http://localhost:6333"
+    qdrant_api_key: str = ""  # required for Qdrant Cloud; empty for local
     qdrant_collection: str = "flight_docs"
 
 

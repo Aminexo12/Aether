@@ -1,0 +1,22 @@
+# Render Blueprint — single-service deploy (API + built React SPA)
+# Vector store lives on Qdrant Cloud (free tier), so no second service needed.
+services:
+  - type: web
+    name: aether
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false          # set in Render dashboard (secret)
+      - key: OPENSKY_CLIENT_ID
+        sync: false
+      - key: OPENSKY_CLIENT_SECRET
+        sync: false
+      - key: QDRANT_URL
+        sync: false          # your Qdrant Cloud cluster URL
+      - key: QDRANT_API_KEY
+        sync: false          # Qdrant Cloud API key
+      - key: QDRANT_COLLECTION
+        value: flight_docs

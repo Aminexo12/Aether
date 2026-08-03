@@ -16,7 +16,7 @@ class SearchResult:
 
 def search_docs(query: str, collection: str, top_k: int = 5) -> list[SearchResult]:
     model = _get_model()
-    client = QdrantClient(url=settings.qdrant_url)
+    client = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key or None)
 
     vector = model.encode(query).tolist()
     response = client.query_points(collection_name=collection, query=vector, limit=top_k)
